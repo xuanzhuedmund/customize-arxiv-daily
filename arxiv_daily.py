@@ -109,13 +109,13 @@ class ArxivDaily:
             f.write(f"## Description: {self.description}\n")
             f.write("## Papers:\n")
             for i, paper in enumerate(recommendations_):
-                f.write(f"### {i+1}. {paper["title"]}\n")
+                f.write(f"### {i+1}. {paper['title']}\n")
                 f.write(f"#### Abstract:\n")
-                f.write(f"{paper["abstract"]}\n")
+                f.write(f"{paper['abstract']}\n")
                 f.write(f"#### Summary:\n")
-                f.write(f"{paper["summary"]}\n")
-                f.write(f"#### Relevance Score: {paper["relevance_score"]}\n")
-                f.write(f"#### PDF URL: {paper["pdf_url"]}\n")
+                f.write(f"{paper['summary']}\n")
+                f.write(f"#### Relevance Score: {paper['relevance_score']}\n")
+                f.write(f"#### PDF URL: {paper['pdf_url']}\n")
                 f.write("\n")
 
         return recommendations_
