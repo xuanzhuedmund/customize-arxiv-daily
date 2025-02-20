@@ -10,7 +10,7 @@
 > This repo borrow the idea and some functions from [zotero-arxiv-daily](https://github.com/TideDra/zotero-arxiv-daily). Thanks for their great work!😊
 
 ## 🧐 Why I create this project <a name = "about"></a>
-- During the use of [zotero-arxiv-daily](https://github.com/TideDra/zotero-arxiv-daily), I often find that the email send to me everyday often don't arrange the paper the way I want. Since my study area has shifted, my Zotero include some papers that I'm not interested in anymore.
+- During the use of [zotero-arxiv-daily](https://github.com/TideDra/zotero-arxiv-daily), I often find that the recommendation process didn't run in the way that I want. Since my study area has shifted, my Zotero include some papers that I'm not interested in anymore.
 - For those who **do not use zotero as PDF reader**, get customized arxiv recommendation is still needed.
 - For those that want to **set their own prompt** to guide LLM during paper selection and recommendation.
 - For those who want to leverage convenient local deployment tools, like **Ollama**
