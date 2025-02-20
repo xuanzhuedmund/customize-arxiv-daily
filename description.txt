@@ -1,0 +1,12 @@
+I am working on the research area of computer vision and natural language processing. Specifically, I am interested in the following fieds:
+1. Deepfake detection
+2. Image Inpainting
+3. AIGC (AI Generated Content) detection
+4. Video Understanding
+5. Streaming Video Understanding
+6. Omni MLLM (Multimodal Large Language Models)
+
+I'm not interested in the following fields:
+1. 3D Vision
+2. Robotics
+3. Low-level Vision
