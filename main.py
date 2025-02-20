@@ -72,21 +72,6 @@ if __name__ == "__main__":
         save_dir=args.save_dir
     )
 
-    # Test Email availability
-    from util.construct_email import send_email
-    try:
-        send_email(
-            args.sender,
-            args.receiver,
-            args.sender_password,
-            args.smtp_server,
-            args.smtp_port,
-            "Test email"
-        )
-    except Exception as e:
-        print(e)
-        assert False, "Email not sent successfully."
-
     arxiv_daily.send_email(
         args.sender,
         args.receiver,

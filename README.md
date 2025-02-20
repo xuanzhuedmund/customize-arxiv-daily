@@ -29,7 +29,7 @@
 ### Quick Start
 1. Run `git clone https://github.com/JoeLeelyf/customize-arxiv-daily.git`
 2. Run `pip install -r requirements.txt` to install necessary packages.
-3. Get your STMP server. Common STMP service provider include [QQ mail box](https://service.mail.qq.com/detail/0/427)
+3. Get your STMP server. Common STMP service provider includes [QQ mail box](https://service.mail.qq.com/detail/0/427)
 4. Describe the research fields you're interested in, and the fields you're not. Edit the `description.txt`. For, example:
 ```txt
 I am working on the research area of computer vision. 
@@ -87,7 +87,7 @@ bash main_silicon_flow.sh
 bash main_ollama.sh
 ```
 
-7. \* Run automatically everyday. For example, use `crontab` on Linux to run the script periodically:
+7. \* **Run automatically everyday.** For example, use `crontab` on Linux to run the script periodically:
 - Edit `crontab` file:
 ```bash
 crontab -e    
@@ -97,7 +97,7 @@ crontab -e
 * 5 * * * /path/to/customize-arxiv-daily/main_gpt.sh
 ```
 
-8. \* Adjust and customize your LLM prompt. Edit `def get_response(self, title, abstract):` func in `arxiv_daily.py`
+8. \* **Adjust and customize your LLM prompt.** Edit `def get_response(self, title, abstract):` func in `arxiv_daily.py`
 
 
 ## Results
