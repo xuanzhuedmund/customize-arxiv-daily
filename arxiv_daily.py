@@ -105,7 +105,7 @@ class ArxivDaily:
         save_path = os.path.join(self.save_dir, f"{current_time.strftime('%Y-%m-%d')}.md")
         with open(save_path, "w") as f:
             f.write("# Daily arXiv Papers\n")
-            f.write(f"## Date: {current_time.strftime("%Y-%m-%d")}\n")
+            f.write(f"## Date: {current_time.strftime('%Y-%m-%d')}\n")
             f.write(f"## Description: {self.description}\n")
             f.write("## Papers:\n")
             for i, paper in enumerate(recommendations_):
