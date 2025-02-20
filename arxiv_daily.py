@@ -3,6 +3,8 @@ from util.request import get_yesterday_arxiv_papers
 from util.construct_email import *
 from tqdm import tqdm
 import json
+import os
+from datetime import datetime
 
 class ArxivDaily:
     def __init__(
@@ -14,12 +16,14 @@ class ArxivDaily:
         model: str,
         base_url: None,
         api_key: None,
-        description: str
+        description: str,
+        save_dir: None
     ):
         self.model_name = model
         self.base_url = base_url
         self.api_key = api_key
         self.max_paper_num = max_paper_num
+        self.save_dir = save_dir
 
         self.papers = {}
         for category in categories:
@@ -63,7 +67,6 @@ class ArxivDaily:
         """
 
         response = self.model.inference(prompt)
-        print(response)
         return response
     
     def get_recommendation(self):
@@ -96,6 +99,25 @@ class ArxivDaily:
             recommendations_ += papers
 
         recommendations_ = sorted(recommendations_, key=lambda x: x["relevance_score"], reverse=True)[:self.max_paper_num]
+
+        # Save recommendation to markdown file
+        current_time = datetime.now()
+        save_path = os.path.join(self.save_dir, f"{current_time.strftime('%Y-%m-%d')}.md")
+        with open(save_path, "w") as f:
+            f.write("# Daily arXiv Papers\n")
+            f.write(f"## Date: {current_time.strftime("%Y-%m-%d")}\n")
+            f.write(f"## Description: {self.description}\n")
+            f.write("## Papers:\n")
+            for i, paper in enumerate(recommendations_):
+                f.write(f"### {i+1}. {paper["title"]}\n")
+                f.write(f"#### Abstract:\n")
+                f.write(f"{paper["abstract"]}\n")
+                f.write(f"#### Summary:\n")
+                f.write(f"{paper["summary"]}\n")
+                f.write(f"#### Relevance Score: {paper["relevance_score"]}\n")
+                f.write(f"#### PDF URL: {paper["pdf_url"]}\n")
+                f.write("\n")
+
         return recommendations_
     
     def summarize(self, recommendations):
@@ -144,7 +166,7 @@ class ArxivDaily:
         msg = MIMEText(html, 'html', 'utf-8')
         msg['From'] = _format_addr('Github Action <%s>' % sender)
         msg['To'] = _format_addr('You <%s>' % receiver)
-        today = datetime.datetime.now().strftime('%Y/%m/%d')
+        today = datetime.now().strftime('%Y/%m/%d')
         msg['Subject'] = Header(f'Daily arXiv {today}', 'utf-8').encode()
 
         try:
@@ -161,19 +183,17 @@ class ArxivDaily:
     
     
 if __name__ == "__main__":
-    categories = ["cs.CV", "cs.CL", "cs.LG"]
+    categories = ["cs.CV"]
     max_entries = 100
     max_paper_num = 50
     provider = "ollama"
     model = "deepseek-r1:7b"
     description = """
-        I am working on the research area of computer vision and natural language processing. Specifically, I am interested in the following fieds:
-        1. Deepfake detection
-        2. Image Inpainting
-        3. AIGC (AI Generated Content) detection
-        4. Video Understanding
-        5. Streaming Video Understanding
-        6. Omni MLLM (Multimodal Large Language Models)
+        I am working on the research area of computer vision and natural language processing. 
+        Specifically, I am interested in the following fieds:
+        1. Object detection
+        2. AIGC (AI Generated Content)
+        3. Multimodal Large Language Models
 
         I'm not interested in the following fields:
         1. 3D Vision

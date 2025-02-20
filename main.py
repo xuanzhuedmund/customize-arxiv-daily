@@ -1,6 +1,7 @@
 from util.construct_email import send_email
 from arxiv_daily import ArxivDaily
 import argparse
+import os
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Arxiv Daily')
@@ -9,6 +10,8 @@ if __name__ == "__main__":
     parser.add_argument('--max_entries', type=int, help='max_entries to get from arxiv', default=100)
     parser.add_argument('--provider', type=str, help='provider', required=True)
     parser.add_argument('--model', type=str, help='model', required=None)
+    parser.add_argument("--save", action='store_true', help="Save the email content to a file.")
+    parser.add_argument("--save_dir", type=str, default="./arxiv_history")
 
     parser.add_argument('--base_url', type=str, help='base_url',default=None)
     parser.add_argument('--api_key', type=str, help='api_key',default=None)
@@ -52,6 +55,11 @@ if __name__ == "__main__":
     else:
         assert False, "Model not supported."
 
+    if args.save:
+        os.makedirs(args.save_dir, exist_ok=True)
+    else:
+        args.save_dir = None
+
     arxiv_daily = ArxivDaily(
         args.categories,
         args.max_entries,
@@ -60,7 +68,8 @@ if __name__ == "__main__":
         args.model,
         args.base_url,
         args.api_key,
-        args.description
+        args.description,
+        save_dir=args.save_dir
     )
 
     # Test Email availability

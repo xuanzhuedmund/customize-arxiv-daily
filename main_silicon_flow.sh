@@ -3,4 +3,5 @@ python main.py --categories cs.CV \
     --base_url https://api.siliconflow.cn/v1 --api_key * \
     --smtp_server smtp.qq.com --smtp_port 465 \
     --sender * --receiver * \
-    --sender_password *
+    --sender_password * \
+    --save
