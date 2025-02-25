@@ -5,6 +5,8 @@ from tqdm import tqdm
 import json
 import os
 from datetime import datetime
+import time
+import random
 
 class ArxivDaily:
     def __init__(
@@ -29,6 +31,9 @@ class ArxivDaily:
         for category in categories:
             self.papers[category] = get_yesterday_arxiv_papers(category, max_entries)
             print("{} papers on arXiv for {} are fetched.".format(len(self.papers[category]), category))
+            # avoid being blocked
+            sleep_time = random.randint(5, 15)
+            time.sleep(sleep_time)
 
         if provider == "ollama" or provider == "Ollama":
             self.provider = "ollama"
@@ -70,33 +75,33 @@ class ArxivDaily:
         return response
     
     def get_recommendation(self):
-        recommendations = {}
         for category, papers in self.papers.items():
-            recommendations[category] = []
-            print("Analyzing papers in category: {}".format(category))
-            for paper in tqdm(papers):
-                title = paper["title"]
-                abstract = paper["abstract"]
-                response = self.get_response(title, abstract)
-                try:
-                    response = response.strip("```").strip("json")
-                    response = json.loads(response)
-                    relevance_score = float(response["relevance"])
-                    summary = response["summary"]
-                    recommendations[category].append({
-                        "title": title,
-                        "arXiv_id": paper["arXiv_id"],
-                        "abstract": abstract,
-                        "summary": summary,
-                        "relevance_score": relevance_score,
-                        "pdf_url": paper["pdf_url"],
-                    })
-                except Exception as e:
-                    print(e)
+            for paper in papers:
+                recommendations[paper["arXiv_id"]] = paper
         
+        print(f"Got {len(recommendations)} non-overlapping papers from yesterday's arXiv.")
+
         recommendations_ = []
-        for category, papers in recommendations.items():
-            recommendations_ += papers
+        print("Performing LLM inference...")
+        for arXiv_id, paper in tqdm(recommendations.items(), desc="Processing papers", unit="paper"):
+            title = paper["title"]
+            abstract = paper["abstract"]
+            response = self.get_response(title, abstract)
+            try:
+                response = response.strip("```").strip("json")
+                response = json.loads(response)
+                relevance_score = float(response["relevance"])
+                summary = response["summary"]
+                recommendations_.append({
+                    "title": title,
+                    "arXiv_id": paper["arXiv_id"],
+                    "abstract": abstract,
+                    "summary": summary,
+                    "relevance_score": relevance_score,
+                    "pdf_url": paper["pdf_url"],
+                })
+            except Exception as e:
+                print(e)
 
         recommendations_ = sorted(recommendations_, key=lambda x: x["relevance_score"], reverse=True)[:self.max_paper_num]
 
