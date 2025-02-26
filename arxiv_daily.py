@@ -75,6 +75,7 @@ class ArxivDaily:
         return response
     
     def get_recommendation(self):
+        recommendations = {}
         for category, papers in self.papers.items():
             for paper in papers:
                 recommendations[paper["arXiv_id"]] = paper

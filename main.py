@@ -7,7 +7,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Arxiv Daily')
     parser.add_argument('--categories', nargs='+', help='categories', required=True)
     parser.add_argument('--max_paper_num', type=int, help='max_paper_num', default=60)
-    parser.add_argument('--max_entries', type=int, help='max_entries to get from arxiv', default=200)
+    parser.add_argument('--max_entries', type=int, help='max_entries to get from arxiv', default=100)
     parser.add_argument('--provider', type=str, help='provider', required=True)
     parser.add_argument('--model', type=str, help='model', required=None)
     parser.add_argument("--save", action='store_true', help="Save the email content to a file.")
