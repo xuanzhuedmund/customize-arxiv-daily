@@ -6,5 +6,7 @@ python main.py --categories cs.CV cs.AI cs.CL cs.CR cs.LG \
     --sender * --receiver * \
     --sender_password * \
     --num_workers 16 \
+    --temperature 0.7 \
     --title "Daily arXiv" \
+    --description "description.txt" \
     --save

@@ -23,8 +23,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--description",
         type=str,
-        help="Describe your interested research area.",
-        default=None,
+        help="Path to the file that describes your interested research area.",
+        default="description.txt",
     )
 
     parser.add_argument("--smtp_server", type=str, help="SMTP server")
@@ -48,10 +48,8 @@ if __name__ == "__main__":
             "api_key is required for SiliconFlow and OpenAI"
         )
 
-    if not args.description:
-        # Read from description.txt
-        with open("description.txt", "r") as f:
-            args.description = f.read()
+    with open(args.description, "r") as f:
+        args.description = f.read()
 
     # Test LLM availability
     if args.provider == "Ollama" or args.provider == "ollama":

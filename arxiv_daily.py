@@ -26,6 +26,7 @@ class ArxivDaily:
         api_key: None,
         description: str,
         num_workers: int,
+        temperature: float,
         save_dir: None,
     ):
         self.model_name = model
@@ -34,6 +35,7 @@ class ArxivDaily:
         self.max_paper_num = max_paper_num
         self.save_dir = save_dir
         self.num_workers = num_workers
+        self.temperature = temperature
         self.papers = {}
         for category in categories:
             self.papers[category] = get_yesterday_arxiv_papers(category, max_entries)
@@ -46,11 +48,10 @@ class ArxivDaily:
             sleep_time = random.randint(5, 15)
             time.sleep(sleep_time)
 
-        if provider == "ollama" or provider == "Ollama":
-            self.provider = "ollama"
+        provider = provider.lower()
+        if provider == "ollama":
             self.model = Ollama(model)
-        elif provider == "OpenAI" or provider == "openai" or provider == "siliconflow":
-            self.provider = "openai"
+        elif provider == "openai" or provider == "siliconflow":
             self.model = GPT(model, base_url, api_key)
         else:
             assert False, "Model not supported."
@@ -87,30 +88,38 @@ class ArxivDaily:
             直接返回上述 JSON 格式，无需任何额外解释。
         """
 
-        response = self.model.inference(prompt)
+        response = self.model.inference(prompt, temperature=self.temperature)
         return response
 
-    def process_paper(self, paper):
-        try:
-            title = paper["title"]
-            abstract = paper["abstract"]
-            response = self.get_response(title, abstract)
-            response = response.strip("```").strip("json")
-            response = json.loads(response)
-            relevance_score = float(response["relevance"])
-            summary = response["summary"]
-            with self.lock:
-                return {
-                    "title": title,
-                    "arXiv_id": paper["arXiv_id"],
-                    "abstract": abstract,
-                    "summary": summary,
-                    "relevance_score": relevance_score,
-                    "pdf_url": paper["pdf_url"],
-                }
-        except Exception as e:
-            print(e)
-            return None
+    def process_paper(self, paper, max_retries=5):
+        retry_count = 0
+
+        while retry_count < max_retries:
+            try:
+                title = paper["title"]
+                abstract = paper["abstract"]
+                response = self.get_response(title, abstract)
+                response = response.strip("```").strip("json")
+                response = json.loads(response)
+                relevance_score = float(response["relevance"])
+                summary = response["summary"]
+                with self.lock:
+                    return {
+                        "title": title,
+                        "arXiv_id": paper["arXiv_id"],
+                        "abstract": abstract,
+                        "summary": summary,
+                        "relevance_score": relevance_score,
+                        "pdf_url": paper["pdf_url"],
+                    }
+            except Exception as e:
+                retry_count += 1
+                print(f"处理论文 {paper['arXiv_id']} 时发生错误: {e}")
+                print(f"正在进行第 {retry_count} 次重试...")
+                if retry_count == max_retries:
+                    print(f"已达到最大重试次数 {max_retries}，放弃处理该论文")
+                    return None
+                time.sleep(1)  # 重试前等待1秒
 
     def get_recommendation(self):
         recommendations = {}
@@ -179,12 +188,61 @@ class ArxivDaily:
             {}
         """.format(overview)
         prompt += """
-            请帮我总结今天的论文，并给我一个简要的概述。
-            使用中文回答。
-            以 HTML 格式返回你的回答。
+            请按以下要求总结今天的论文:
+
+            1. 总体概述
+            - 简要总结今天论文的主要研究领域和热点方向
+            - 分析研究趋势和关注重点
+
+            2. 分主题详细分析
+            - 将论文按研究主题分类
+            - 每个主题下的论文按相关性从高到低排序
+            - 对每篇论文按以下格式分析:
+                1. 论文标题 (高度相关/相关/一般相关)
+
+                摘要: 非常简要地总结论文的主要内容和创新点。
+
+                相关性分析: 分析该论文与研究领域的关联度,以及对研究的价值。
+
+            3. 总体趋势分析
+            - 总结当前研究热点和发展趋势
+            - 分析未来可能的研究方向
+
+            请以HTML格式返回,使用中文,包含以下结构:
+            <h2>总体概述</h2>
+            <p>整体概述内容</p>
+
+            <h2>主题：主题分类的名称</h2>
+            <ol>
+                <li>论文标题 (相关性)</li>
+                <p>摘要: 论文内容总结</p>
+                <p>相关性分析: 分析论文价值</p>
+                ...
+            </ol>
+
+            <h2>总体趋势</h2>
+            <ol>
+                <li>趋势分析</li>
+            </ol>
+
+            <h2>未来研究方向</h2>
+            <ol>
+                <li>未来研究方向1</li>
+                <li>未来研究方向2</li>
+                ...
+            </ol>
+
+            直接返回HTML内容,无需其他说明。
         """
 
-        response = self.model.inference(prompt).strip("```").strip("html").strip()
+        response = (
+            self.model.inference(prompt, temperature=self.temperature)
+            .strip("```")
+            .strip("html")
+            .strip()
+        )
+        print(response)
+        response = get_summary_html(response)
         return response
 
     def render_email(self, recommendations):
