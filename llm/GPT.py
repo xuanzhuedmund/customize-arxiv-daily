@@ -34,12 +34,13 @@ class GPT():
         ]
         return prompt
 
-    def call_gpt_eval(self, message, model_name, retries=10, wait_time=1):
+    def call_gpt_eval(self, message, model_name, retries=10, wait_time=1, temperature=0.0):
         for i in range(retries):
             try:
                 result = self.client.chat.completions.create(
                     model=model_name,
-                    messages=message
+                    messages=message,
+                    temperature=temperature
                 )
                 response_message = result.choices[0].message.content
                 return response_message
@@ -54,9 +55,9 @@ class GPT():
                     print(e)
                     raise
 
-    def inference(self, prompt):
+    def inference(self, prompt, temperature=0.7):
         prompt = self.build_prompt(prompt)
-        response = self.call_gpt_eval(prompt, self.model_name)
+        response = self.call_gpt_eval(prompt, self.model_name, temperature=temperature)
         return response
     
 if __name__ == "__main__":
@@ -71,5 +72,5 @@ if __name__ == "__main__":
     api_key = "*"
     gpt = GPT(model, base_url, api_key)
     prompt = "Hello, who are you?"
-    response = gpt.inference(prompt)
+    response = gpt.inference(prompt, temperature=1)
     print(response)
