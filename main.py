@@ -32,6 +32,7 @@ if __name__ == "__main__":
     parser.add_argument("--sender", type=str, help="Sender email address")
     parser.add_argument("--receiver", type=str, help="Receiver email address")
     parser.add_argument("--sender_password", type=str, help="Sender email password")
+    parser.add_argument("--temperature", type=float, help="Temperature", default=0.7)
 
     parser.add_argument("--num_workers", type=int, help="Number of workers", default=4)
     parser.add_argument(
@@ -92,6 +93,7 @@ if __name__ == "__main__":
         args.api_key,
         args.description,
         args.num_workers,
+        args.temperature,
         save_dir=args.save_dir,
     )
 
