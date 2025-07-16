@@ -6,5 +6,5 @@ __pycache__
 .env
 .ruff_cache
 arxiv_history
-config.json
+config_private.json
 *.pyc

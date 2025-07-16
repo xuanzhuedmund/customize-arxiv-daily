@@ -1,7 +1,13 @@
 #!/bin/bash
 
-# Define the configuration file
-CONFIG_FILE="config.json"
+# Define the configuration file, prioritizing config_private.json
+if [ -f "config_private.json" ]; then
+    # If the private config file exists, use it
+    CONFIG_FILE="config_private.json"
+else
+    # Otherwise, use the default config file
+    CONFIG_FILE="config.json"
+fi
 
 # Function to read JSON values
 read_json_value() {
