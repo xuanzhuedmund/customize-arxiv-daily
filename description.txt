@@ -1,10 +1,11 @@
 I am working on the research area of computer vision and natural language processing. 
 Specifically, I am interested in the following fieds:
-1. Object detection
+1. Multiagent Systems
 2. AIGC (AI Generated Content)
-3. Multimodal Large Language Models
+3. cold atom interferometry
+4. AI4Sci
+5. laser cooling atom
+6. Absolute quantum gravimeters
+7. Machine Learning
 
 I'm not interested in the following fields:
-1. 3D Vision
-2. Robotics
-3. Low-level Vision
