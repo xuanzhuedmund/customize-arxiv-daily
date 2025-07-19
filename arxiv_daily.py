@@ -28,6 +28,7 @@ class ArxivDaily:
         num_workers: int,
         temperature: float,
         save_dir: None,
+        server_chan_key: str = "",
     ):
         self.model_name = model
         self.base_url = base_url
@@ -36,6 +37,7 @@ class ArxivDaily:
         self.save_dir = save_dir
         self.num_workers = num_workers
         self.temperature = temperature
+        self.server_chan_key = server_chan_key
         self.papers = {}
         for category in categories:
             self.papers[category] = get_yesterday_arxiv_papers(category, max_entries)
@@ -157,7 +159,10 @@ class ArxivDaily:
         save_path = os.path.join(
             self.save_dir, f"{current_time.strftime('%Y-%m-%d')}.md"
         )
-        with open(save_path, "w") as f:
+        # Create the directory if it doesn't exist
+        os.makedirs(self.save_dir, exist_ok=True)
+
+        with open(save_path, "w", encoding="utf-8") as f:
             f.write("# Daily arXiv Papers\n")
             f.write(f"## Date: {current_time.strftime('%Y-%m-%d')}\n")
             f.write(f"## Description: {self.description}\n")
@@ -266,6 +271,45 @@ class ArxivDaily:
         content += "<br>" + "</br><br>".join(parts) + "</br>"
         return framework.replace("__CONTENT__", content)
 
+    def _send_to_server_chan(self, title, desp):
+        """
+        使用Server酱发送通知，支持多个KEY
+        title: 通知标题
+        desp: 通知内容
+        """
+        try:
+            import requests
+
+            # Use the key from the constructor
+            server_chan_key_str = self.server_chan_key
+            Server_chan_KEY = server_chan_key_str.split(',')
+            Server_chan_KEY = [key.strip() for key in Server_chan_KEY if key.strip()]
+
+            if not Server_chan_KEY:
+                print("未配置Server酱KEY,跳过通知发送")
+                return False
+
+            success_count = 0
+            for key in Server_chan_KEY:
+                try:
+                    # Server酱通知接口
+                    server_url = f"https://sctapi.ftqq.com/{key}.send"
+                    # 构造请求数据
+                    data = {"title": title, "desp": desp}
+                    # 发送POST请求
+                    response = requests.post(server_url, data=data)
+                    if response.status_code == 200:
+                        print(f"Server酱通知发送成功 (KEY: {key[:4]}...)")
+                        success_count += 1
+                    else:
+                        print(f"Server酱通知发送失败,状态码:{response.status_code} (KEY: {key[:4]}...)")
+                except Exception as e:
+                    print(f"使用KEY {key[:4]}...发送通知时出错: {str(e)}")
+            return success_count > 0
+        except Exception as e:
+            print(f"发送Server酱通知时出错:{str(e)}")
+            return False
+
     def send_email(
         self,
         sender: str,
@@ -286,7 +330,7 @@ class ArxivDaily:
         msg["From"] = _format_addr(f"{title} <%s>" % sender)
 
         # 处理多个接收者
-        receivers = [addr.strip() for addr in receiver.split(",")]
+        receivers = [addr.strip() for addr in receiver.split(',')]  # Fixed typo: receiver.split(",")
         print(receivers)
         msg["To"] = ",".join([_format_addr(f"You <%s>" % addr) for addr in receivers])
 
@@ -301,9 +345,16 @@ class ArxivDaily:
             logger.warning(f"Try to use SSL.")
             server = smtplib.SMTP_SSL(smtp_server, smtp_port)
 
-        server.login(sender, password)
-        server.sendmail(sender, receivers, msg.as_string())
-        server.quit()
+        try:
+            server.login(sender, password)
+            server.sendmail(sender, receivers, msg.as_string())
+            server.quit()
+            logger.info("Email sent successfully!")
+        except Exception as e:
+            logger.error(f"Failed to send email: {e}")
+            logger.info("Falling back to ServerChan.")
+            print(msg.as_string())
+            self._send_to_server_chan(f"{title} {today}", msg.as_string())
 
 
 if __name__ == "__main__":
@@ -326,7 +377,7 @@ if __name__ == "__main__":
     """
 
     arxiv_daily = ArxivDaily(
-        categories, max_entries, max_paper_num, provider, model, None, None, description
+        categories, max_entries, max_paper_num, provider, model, None, None, description, server_chan_key=""
     )
     recommendations = arxiv_daily.get_recommendation()
     print(recommendations)

@@ -1,6 +1,9 @@
 tqdm
 loguru
+colorama
 # For ollama
 ollama
 # For openai
 openai
+requests
+bs4
