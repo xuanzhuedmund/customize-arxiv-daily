@@ -1,6 +1,12 @@
 from llm import *
-from util.request import get_yesterday_arxiv_papers
-from util.construct_email import *
+from util.request import get_arxiv_papers_from_date
+from util.construct_email import (
+    framework,
+    get_block_html,
+    get_empty_html,
+    get_stars,
+    get_summary_html,
+)
 from tqdm import tqdm
 import json
 import os
@@ -8,10 +14,12 @@ from datetime import datetime
 import time
 import random
 import smtplib
+from email.mime.text import MIMEText
 from email.header import Header
 from email.utils import parseaddr, formataddr
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
+from loguru import logger
 
 
 class ArxivDaily:
@@ -40,7 +48,7 @@ class ArxivDaily:
         self.server_chan_key = server_chan_key
         self.papers = {}
         for category in categories:
-            self.papers[category] = get_yesterday_arxiv_papers(category, max_entries)
+            self.papers[category] = get_arxiv_papers_from_date(category, max_entries, days="pastweek")
             print(
                 "{} papers on arXiv for {} are fetched.".format(
                     len(self.papers[category]), category
@@ -68,7 +76,7 @@ class ArxivDaily:
 
     def get_response(self, title, abstract):
         prompt = """
-            你是一个有帮助的 AI 研究助手，可以帮助我构建每日论文推荐系统。
+            你是一个有帮助的 AI 研究助手，可以帮助我构建论文推荐系统。
             以下是我最近研究领域的描述：
             {}
         """.format(self.description)
@@ -184,19 +192,19 @@ class ArxivDaily:
         for i in range(len(recommendations)):
             overview += f"{i + 1}. {recommendations[i]['title']} - {recommendations[i]['summary']} \n"
         prompt = """
-            你是一个有帮助的 AI 研究助手，可以帮助我构建每日论文推荐系统。
+            你是一个有帮助的 AI 研究助手，可以帮助我构建论文推荐系统。
             以下是我最近研究领域的描述：
             {}
         """.format(self.description)
         prompt += """
-            以下是我从昨天的 arXiv 爬取的论文，我为你提供了标题和摘要：
+            以下是我从 arXiv 爬取的论文，我为你提供了标题和摘要：
             {}
         """.format(overview)
         prompt += """
-            请按以下要求总结今天的论文:
+            请按以下要求总结论文:
 
             1. 总体概述
-            - 简要总结今天论文的主要研究领域和热点方向
+            - 简要总结论文的主要研究领域和热点方向
             - 分析研究趋势和关注重点
 
             2. 分主题详细分析

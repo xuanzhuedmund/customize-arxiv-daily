@@ -1,14 +1,10 @@
 {
   "script_path": "/path/to/customized-arxiv-daily/main.py",  
-  "categories": ["cs.CV", "cs.AI", "cs.CL", "cs.CR", "cs.LG"], 
   "smtp_server": "smtp.qq.com",  
   "smtp_port": 465,  
   "sender": "*",  
-  "receiver": "*",  
   "sender_password": "*", 
   "save": true,  
-  "max_paper_num": 60,
-  "max_entries": 100,
   "num_workers":4,
   "Server_chan_KEY": "*",
   "main_silicon_flow": {
@@ -30,5 +26,40 @@
   "main_ollama": {
     "provider": "Ollama",
     "model": "deepseek-r1:7b"
+  },
+  "names": ["p1", "p2", "p3"],
+  "p1": {
+    "categories": ["cs.CV", "cs.AI"],
+    "receiver": ["p1@example.com"],
+    "description": [
+      "I am working on the research area of cold atom interferometry. ",
+      "Specifically, I am interested in the following fieds:",
+      "1. Multiagent Systems",
+      "2. AIGC (AI Generated Content)",
+      "3. cold atom interferometry",
+      "4. AI4Sci",
+      "5. laser cooling atom",
+      "6. Absolute quantum gravimeters",
+      "7. Machine Learning",
+      "",
+      "I'm not interested in the following fields:"
+    ]
+  },
+  "p2": {
+    "categories": ["cs.CL", "cs.CR"],
+    "receiver": ["p2@example.com"],
+    "description": [
+      "I am working on the research area of cold atom interferometry. ",
+      "Specifically, I am interested in the following fieds:",
+      "1. Multiagent Systems",
+      "2. AIGC (AI Generated Content)",
+      "3. cold atom interferometry",
+      "4. AI4Sci",
+      "5. laser cooling atom",
+      "6. Absolute quantum gravimeters",
+      "7. Machine Learning",
+      "",
+      "I'm not interested in the following fields:"
+    ]
   }
 }

@@ -1,4 +1,4 @@
-I am working on the research area of computer vision and natural language processing. 
+I am working on the research area of cold atom interferometry. 
 Specifically, I am interested in the following fieds:
 1. Multiagent Systems
 2. AIGC (AI Generated Content)
