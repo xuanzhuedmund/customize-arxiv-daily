@@ -68,18 +68,16 @@ def get_arxiv_papers_from_date(category: str = "physics.optics", max_results: in
             
             soup = BeautifulSoup(response.text, "html.parser")
             
+            papers_on_this_page = 0
+            limit_reached = False
             try:
                 # 获取所有dl元素，每个都可能包含论文
                 dl_elements = soup.find_all("dl", id="articles")
                 
-                total_entries = 0
-                for dl in dl_elements:
-                    entries = dl.find_all(["dt", "dd"])
-                    total_entries += len(entries)
-                
                 # 处理所有dl元素中的论文
                 for dl in dl_elements:
                     entries = dl.find_all(["dt", "dd"])
+                    papers_on_this_page += len(entries)
                     
                     for i in range(0, len(entries), 2):
                         if i + 1 >= len(entries):
@@ -117,21 +115,22 @@ def get_arxiv_papers_from_date(category: str = "physics.optics", max_results: in
                         }
 
                         all_papers.append(paper_info)
-                
+                        if len(all_papers) >= max_results:
+                            limit_reached = True
+                            break
+                    if limit_reached:
+                        break
             except Exception as e:
                 break
             
-            if total_entries == 0:
-                break
-                
-            # 如果获取的条目数少于预期，说明已经获取完所有数据
-            if total_entries < 4000:
+            # If the limit is reached, or the page is empty, or it's the last page, exit the loop.
+            if limit_reached or papers_on_this_page == 0 or papers_on_this_page < (batch_size * 2):
                 break
                 
             skip += batch_size
             time.sleep(1)  # 避免请求过于频繁
         
-        return all_papers
+        return all_papers[:max_results]
 
 
 if __name__ == "__main__":
