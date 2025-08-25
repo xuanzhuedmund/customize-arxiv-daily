@@ -10,6 +10,7 @@ def get_arxiv_papers_from_date(category: str = "physics.optics", max_results: in
 
     if days == "yesterday": # 昨天
         url = f"https://arxiv.org/list/{category}/new?skip=0&show={max_results}"
+        time.sleep(1)
         response = requests.get(url)
 
         soup = BeautifulSoup(response.text, "html.parser")
@@ -69,6 +70,7 @@ def get_arxiv_papers_from_date(category: str = "physics.optics", max_results: in
             # show={batch_size}: 指定每页显示的最大论文数量。
             url = f"https://arxiv.org/list/{category}/pastweek?skip={skip}&show={batch_size}"
             # 发送HTTP GET请求到构建好的URL，获取页面内容。
+            time.sleep(1)
             response = requests.get(url)
             
             # 使用BeautifulSoup库和Python内置的html.parser来解析返回的HTML文本。
@@ -120,6 +122,7 @@ def get_arxiv_papers_from_date(category: str = "physics.optics", max_results: in
                         pdf_url = entries[i].find("a", title="Download PDF")["href"]
                         pdf_url = "https://arxiv.org" + pdf_url
                         # 发送HTTP GET请求到构建好的URL，获取页面内容。
+                        time.sleep(1)
                         abs_response = requests.get(abs_url)
                         
                         # 使用BeautifulSoup库和Python内置的html.parser来解析返回的HTML文本。
