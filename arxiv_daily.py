@@ -358,6 +358,7 @@ class ArxivDaily:
             server.sendmail(sender, receivers, msg.as_string())
             server.quit()
             logger.info("Email sent successfully!")
+            self._send_to_server_chan(f"{today}邮件发送成功", f"已成功发送邮件至: {', '.join(receivers)}")
         except Exception as e:
             logger.error(f"Failed to send email: {e}")
             logger.info("Falling back to ServerChan.")
