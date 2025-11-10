@@ -20,6 +20,7 @@ from email.utils import parseaddr, formataddr
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 from loguru import logger
+from datetime import timedelta
 
 
 class ArxivDaily:
@@ -91,6 +92,7 @@ class ArxivDaily:
             
             请按以下 JSON 格式给出你的回答：
             {
+                "abstract": <摘要的中文译文>,
                 "summary": <你的总结>,
                 "relevance": <你的评分>
             }
@@ -111,6 +113,7 @@ class ArxivDaily:
                 response = self.get_response(title, abstract)
                 response = response.strip("```").strip("json")
                 response = json.loads(response)
+                abstract_cn = response["abstract"]
                 relevance_score = float(response["relevance"])
                 summary = response["summary"]
                 with self.lock:
@@ -118,6 +121,7 @@ class ArxivDaily:
                         "title": title,
                         "arXiv_id": paper["arXiv_id"],
                         "abstract": abstract,
+                        "abstract_cn": abstract_cn,
                         "summary": summary,
                         "relevance_score": relevance_score,
                         "pdf_url": paper["pdf_url"],
@@ -138,7 +142,7 @@ class ArxivDaily:
                 recommendations[paper["arXiv_id"]] = paper
 
         print(
-            f"Got {len(recommendations)} non-overlapping papers from yesterday's arXiv."
+            f"Got {len(recommendations)} non-overlapping papers from the past week's arXiv."
         )
 
         recommendations_ = []
@@ -171,14 +175,16 @@ class ArxivDaily:
         os.makedirs(self.save_dir, exist_ok=True)
 
         with open(save_path, "w", encoding="utf-8") as f:
-            f.write("# Daily arXiv Papers\n")
-            f.write(f"## Date: {current_time.strftime('%Y-%m-%d')}\n")
+            f.write("# Weekly arXiv Papers\n")
+            # 计算周报起始时间：以当前时间为基准向前推7天，用于生成周报日期范围
+            start_time = current_time - timedelta(days=7)
+            f.write(f"## Date: {start_time.strftime('%Y-%m-%d')} - {current_time.strftime('%Y-%m-%d')}\n")
             f.write(f"## Description: {self.description}\n")
             f.write("## Papers:\n")
             for i, paper in enumerate(recommendations_):
                 f.write(f"### {i + 1}. {paper['title']}\n")
                 f.write(f"#### Abstract:\n")
-                f.write(f"{paper['abstract']}\n")
+                f.write(f"{paper['abstract_cn']}\n")
                 f.write(f"#### Summary:\n")
                 f.write(f"{paper['summary']}\n")
                 f.write(f"#### Relevance Score: {paper['relevance_score']}\n")
@@ -213,7 +219,7 @@ class ArxivDaily:
             - 对每篇论文按以下格式分析:
                 1. 论文标题 (高度相关/相关/一般相关)
 
-                摘要: 非常简要地总结论文的主要内容和创新点。
+                摘要: 直接使用我提供的与标题对应的中文摘要。
 
                 相关性分析: 分析该论文与研究领域的关联度,以及对研究的价值。
 
