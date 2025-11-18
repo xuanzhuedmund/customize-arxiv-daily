@@ -89,15 +89,14 @@ def run_arxiv_daily(tool_section=None,name=None):
         server_chan_key=server_chan_key,
     )
 
-    for receiver in receivers:
-        arxiv_daily.send_email(
-            sender,
-            receiver,
-            sender_password,
-            smtp_server,
-            smtp_port,
-            title,
-        )
+    arxiv_daily.send_email(
+        sender,
+        receivers,
+        sender_password,
+        smtp_server,
+        smtp_port,
+        title,
+    )
 
 if __name__ == "__main__":
     import sys

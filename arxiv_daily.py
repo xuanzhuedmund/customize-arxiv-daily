@@ -344,7 +344,10 @@ class ArxivDaily:
         msg["From"] = _format_addr(f"{title} <%s>" % sender)
 
         # 处理多个接收者
-        receivers = [addr.strip() for addr in receiver.split(',')]  # Fixed typo: receiver.split(",")
+        if isinstance(receiver, list):
+            receivers = receiver
+        else:
+            receivers = [addr.strip() for addr in receiver.split(',')]
         print(receivers)
         msg["To"] = ",".join([_format_addr(f"You <%s>" % addr) for addr in receivers])
 
